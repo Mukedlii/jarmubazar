@@ -1,9 +1,14 @@
 import { listings } from "@/lib/mockData";
 import { formatPrice } from "@/lib/utils";
 
-export default function ListingDetail({ params }: { params: { id: string } }) {
-  const id = parseInt(params.id);
-  const listing = listings.find((l) => l.id === id);
+export default async function ListingDetail({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const listingId = parseInt(id);
+  const listing = listings.find((l) => l.id === listingId);
 
   if (!listing) {
     return <div className="p-4">A hirdetés nem található.</div>;
