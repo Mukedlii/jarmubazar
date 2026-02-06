@@ -2,46 +2,59 @@ import Link from "next/link";
 
 import { APP } from "@/lib/config";
 
-export default function Home() {
+export default function Page() {
   return (
-    <main className="min-h-screen bg-white text-slate-900">
-      <div className="mx-auto max-w-3xl px-5 py-10">
-        <header className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight">{APP.name}</h1>
-          <p className="mt-2 text-slate-600">
-            Jármű hirdetések – {APP.region}. (MVP)
-          </p>
-        </header>
-
-        <section className="space-y-3 rounded-xl border p-5">
-          <h2 className="text-lg font-semibold">Mit tud most?</h2>
-          <ul className="list-disc space-y-1 pl-5 text-slate-700">
-            <li>Mobilbarát webapp (PWA alap).</li>
-            <li>Email magic link bejelentkezés (később bekötjük Supabase-szal).</li>
-            <li>Hirdetés feladás + admin jóváhagyás (pending → approved).</li>
-            <li>Értesítések: Web Push + Email (SMS később).</li>
-          </ul>
-        </section>
-
-        <section className="mt-6 grid gap-3 sm:grid-cols-2">
-          <Link
-            href="/browse"
-            className="rounded-xl bg-slate-900 px-5 py-4 text-center font-semibold text-white hover:bg-slate-800"
-          >
-            Böngészés
-          </Link>
-          <Link
-            href="/post"
-            className="rounded-xl border px-5 py-4 text-center font-semibold hover:bg-slate-50"
-          >
-            Hirdetés feladás
-          </Link>
-        </section>
-
-        <footer className="mt-10 text-sm text-slate-500">
-          Admin: {APP.adminEmail}
-        </footer>
+    <section className="flex flex-col items-center justify-center text-center space-y-8">
+      <div className="space-y-4">
+        <h1 className="text-3xl md:text-5xl font-bold text-gray-900">
+          {APP.name} – Jármű hirdetések {APP.region}
+        </h1>
+        <p className="text-lg md:text-xl text-gray-700 max-w-2xl mx-auto">
+          Modern, gyors, mobilbarát – és átláthatóbb felület, olcsóbb kiemelésekkel.
+        </p>
       </div>
-    </main>
+
+      <div className="flex flex-col sm:flex-row gap-4">
+        <Link
+          href="/browse"
+          className="bg-blue-600 text-white px-6 py-3 rounded shadow hover:bg-blue-700 transition-colors"
+        >
+          Böngészés
+        </Link>
+        <Link
+          href="/post"
+          className="bg-gray-200 text-gray-800 px-6 py-3 rounded shadow hover:bg-gray-300 transition-colors"
+        >
+          Hirdetés feladás
+        </Link>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mt-8 max-w-4xl">
+        <div className="p-4 bg-white rounded shadow text-left">
+          <h3 className="font-semibold text-gray-900 mb-2">Gyors értesítések</h3>
+          <p className="text-sm text-gray-700">
+            Web Push és e-mail értesítések, hogy azonnal értesülj a friss hirdetésekről.
+          </p>
+        </div>
+        <div className="p-4 bg-white rounded shadow text-left">
+          <h3 className="font-semibold text-gray-900 mb-2">Jóváhagyott hirdetések</h3>
+          <p className="text-sm text-gray-700">
+            Minden hirdetést admin jóváhagyása előz meg, így kevesebb a spam.
+          </p>
+        </div>
+        <div className="p-4 bg-white rounded shadow text-left">
+          <h3 className="font-semibold text-gray-900 mb-2">Helyi fókusz</h3>
+          <p className="text-sm text-gray-700">
+            {APP.region} fókuszú hirdetések – több releváns ajánlat, kevesebb zaj.
+          </p>
+        </div>
+        <div className="p-4 bg-white rounded shadow text-left">
+          <h3 className="font-semibold text-gray-900 mb-2">Átláthatóbb, modernebb UI</h3>
+          <p className="text-sm text-gray-700">
+            Egyszerű kezelhetőség és kedvező kiemelési csomagok az induláskor.
+          </p>
+        </div>
+      </div>
+    </section>
   );
 }
