@@ -2,70 +2,51 @@
 
 import { useState } from "react";
 
-import { mockData } from "@/lib/mockData";
+import { listings } from "@/lib/mockData";
 import { formatPrice } from "@/lib/utils";
 
-export default function Page() {
-  const [items, setItems] = useState(mockData);
+export default function AdminPage() {
+  const [pending, setPending] = useState(listings);
 
-  function handleAction(id: string, _action: "approve" | "reject") {
-    // UI-only: eltávolítjuk az elemet a listából
-    setItems((prev) => prev.filter((item) => item.id !== id));
+  function approve(id: number) {
+    setPending((prev) => prev.filter((p) => p.id !== id));
   }
 
   return (
-    <div className="space-y-6">
-      <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 p-4 rounded">
-        <strong>Figyelem:</strong> Csak adminnak hozzáférhető felület.
-      </div>
+    <div className="max-w-5xl mx-auto p-4">
+      <div className="bg-red-100 text-red-700 p-2 rounded mb-4">Csak adminnak! (UI csak demó)</div>
 
-      <h1 className="text-2xl font-semibold text-gray-900">Jóváhagyásra váró hirdetések</h1>
+      <h1 className="text-2xl font-bold mb-4">Jóváhagyásra váró hirdetések</h1>
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200 bg-white rounded shadow">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-700">Cím</th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-700">Ár</th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-700">Település</th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-700">Beküldve</th>
-              <th className="px-4 py-2 text-right text-xs font-medium text-gray-700">Művelet</th>
+      <table className="w-full border text-sm">
+        <thead>
+          <tr className="bg-gray-100">
+            <th className="p-2 border">Cím</th>
+            <th className="p-2 border">Ár</th>
+            <th className="p-2 border">Település</th>
+            <th className="p-2 border">Beküldve</th>
+            <th className="p-2 border">Művelet</th>
+          </tr>
+        </thead>
+        <tbody>
+          {pending.map((item) => (
+            <tr key={item.id}>
+              <td className="p-2 border">{item.title}</td>
+              <td className="p-2 border">{formatPrice(item.price)}</td>
+              <td className="p-2 border">{item.location}</td>
+              <td className="p-2 border">{item.posted}</td>
+              <td className="p-2 border">
+                <button onClick={() => approve(item.id)} className="bg-green-600 text-white px-2 py-1 rounded mr-2">
+                  Approve
+                </button>
+                <button onClick={() => approve(item.id)} className="bg-red-600 text-white px-2 py-1 rounded">
+                  Reject
+                </button>
+              </td>
             </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {items.map((item) => (
-              <tr key={item.id} className="hover:bg-gray-50">
-                <td className="px-4 py-2 text-sm text-gray-900">{item.title}</td>
-                <td className="px-4 py-2 text-sm text-gray-900">{formatPrice(item.price)}</td>
-                <td className="px-4 py-2 text-sm text-gray-900">{item.location}</td>
-                <td className="px-4 py-2 text-sm text-gray-900">{item.time}</td>
-                <td className="px-4 py-2 text-sm text-gray-900 text-right space-x-2">
-                  <button
-                    onClick={() => handleAction(item.id, "approve")}
-                    className="bg-green-500 text-white px-3 py-1 rounded text-xs hover:bg-green-600 transition-colors"
-                  >
-                    Approve
-                  </button>
-                  <button
-                    onClick={() => handleAction(item.id, "reject")}
-                    className="bg-red-500 text-white px-3 py-1 rounded text-xs hover:bg-red-600 transition-colors"
-                  >
-                    Reject
-                  </button>
-                </td>
-              </tr>
-            ))}
-
-            {items.length === 0 && (
-              <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-sm text-gray-500">
-                  Nincs több jóváhagyásra váró hirdetés.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

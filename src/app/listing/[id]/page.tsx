@@ -1,67 +1,49 @@
-import { mockData } from "@/lib/mockData";
+import { listings } from "@/lib/mockData";
 import { formatPrice } from "@/lib/utils";
 
-export default function Page({ params }: { params: { id: string } }) {
-  const item = mockData.find((x) => x.id === params.id) ?? mockData[0];
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-2">
-        <h1 className="text-2xl font-bold text-gray-900">{item.title}</h1>
-        <span className="text-2xl text-blue-600 font-bold">{formatPrice(item.price)}</span>
-      </div>
+export default function ListingDetail({ params }: { params: { id: string } }) {
+  const id = parseInt(params.id);
+  const listing = listings.find((l) => l.id === id);
 
-      <div className="flex flex-col md:flex-row gap-6">
-        <div className="md:w-2/3 space-y-4">
-          <div className="h-64 bg-gray-200 rounded" />
+  if (!listing) {
+    return <div className="p-4">A hirdetés nem található.</div>;
+  }
+
+  return (
+    <div className="max-w-5xl mx-auto p-4">
+      <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex-1">
+          <div className="h-56 bg-gray-200 flex items-center justify-center mb-2">Főkép</div>
           <div className="grid grid-cols-3 gap-2">
-            <div className="h-16 bg-gray-200 rounded" />
-            <div className="h-16 bg-gray-200 rounded" />
-            <div className="h-16 bg-gray-200 rounded" />
+            <div className="h-20 bg-gray-200"></div>
+            <div className="h-20 bg-gray-200"></div>
+            <div className="h-20 bg-gray-200"></div>
           </div>
         </div>
 
-        <div className="md:w-1/3 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900">Főbb adatok</h2>
-          <ul className="space-y-1 text-sm text-gray-700">
-            <li>
-              <span className="font-medium">Település:</span> {item.location}
-            </li>
-            <li>
-              <span className="font-medium">Kategória:</span> {item.category}
-            </li>
-            <li>
-              <span className="font-medium">Feltöltve:</span> {item.time}
-            </li>
-          </ul>
+        <div className="flex-1 space-y-2">
+          <h1 className="text-2xl font-bold">{listing.title}</h1>
+          <p className="text-blue-600 text-lg font-semibold">{formatPrice(listing.price)}</p>
+          <p>
+            {listing.location} • {listing.posted}
+          </p>
+          <p>Kategória: {listing.category}</p>
+          <p className="mt-4">{listing.description ?? "Leírás hamarosan..."}</p>
 
-          <div className="space-y-2">
+          <div className="mt-6 space-x-2">
             <button
               disabled
-              className="w-full bg-gray-200 text-gray-500 px-4 py-2 rounded cursor-not-allowed"
               title="MVP-ben később"
+              className="bg-gray-300 text-gray-500 px-4 py-2 rounded"
             >
               Üzenet küldése
             </button>
-            <button
-              disabled
-              className="w-full bg-gray-200 text-gray-500 px-4 py-2 rounded cursor-not-allowed"
-              title="MVP-ben később"
-            >
+            <button disabled className="bg-gray-300 text-gray-500 px-4 py-2 rounded">
               Telefon megjelenítése
             </button>
-            <button className="w-full bg-red-50 text-red-600 px-4 py-2 rounded hover:bg-red-100 transition-colors">
-              Report
-            </button>
+            <button className="bg-red-100 text-red-600 px-4 py-2 rounded">Jelentés</button>
           </div>
         </div>
-      </div>
-
-      <div className="space-y-2">
-        <h2 className="text-lg font-semibold text-gray-900">Leírás</h2>
-        <p className="text-sm text-gray-700">
-          Részletes leírás a járműről. Ez a szöveg csak minta, a valódi hirdetésnél a felhasználó által megadott leírás
-          jelenik meg.
-        </p>
       </div>
     </div>
   );

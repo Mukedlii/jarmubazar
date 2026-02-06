@@ -1,5 +1,5 @@
 export const APP = {
   name: "Autóbazár",
-  region: "Komárom-Esztergom",
-  adminEmail: "marky.genoff@gmail.com",
+  region: "Komárom-Esztergom megye",
+  adminEmail: "info@autobazar.hu",
 };
