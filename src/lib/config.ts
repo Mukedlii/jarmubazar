@@ -1,5 +1,9 @@
 export const APP = {
-  name: "Autóbazár",
+  name: "JárműBazár",
   region: "Komárom-Esztergom megye",
-  adminEmail: "info@autobazar.hu",
+  // Temporary contact until domain email is set up
+  adminEmail: "marky.genoff@gmail.com",
+  // Planned:
+  // site: https://jarmubazar.eu
+  // contact: info@jarmubazar.eu
 };
