@@ -37,10 +37,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
         <footer className="bg-gray-100 text-gray-600 py-4 mt-8">
           <div className="mx-auto max-w-5xl px-4 text-center text-sm">
-            Kapcsolat:{" "}
-            <a href={`mailto:${APP.adminEmail}`} className="underline hover:text-blue-600">
-              {APP.adminEmail}
-            </a>
+            <Link href="/contact" className="underline hover:text-blue-600">
+              Kapcsolat
+            </Link>
           </div>
         </footer>
       </body>
