@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 
+import { TurnstileWidget } from "@/components/TurnstileWidget";
 import { CAR_BRANDS, listings } from "@/lib/mockData";
 
 const inputClass =
@@ -14,6 +15,12 @@ function toInt(v: string) {
 
 export default function PostPage() {
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string>("");
+
+  // Honeypot: bots tend to fill every field. Real users never see this.
+  const [website, setWebsite] = useState<string>("");
+
+  const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
   const [category, setCategory] = useState<"Autó" | "Motor" | "Alkatrész">("Autó");
 
@@ -67,27 +74,94 @@ export default function PostPage() {
         </p>
       </div>
 
+      {error && (
+        <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-900 dark:border-red-900/30 dark:bg-red-900/10 dark:text-red-200">
+          {error}
+        </div>
+      )}
+
       <form
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
+          setError("");
+
+          // Honeypot tripped
+          if (website.trim().length > 0) {
+            setError("Sikertelen beküldés (spam védelem). Próbáld újra.");
+            return;
+          }
 
           // basic validation
           const p = toInt(price);
           const y = toInt(year);
           const k = toInt(km);
 
-          if (p == null || p <= 0) return;
+          if (p == null || p <= 0) {
+            setError("Kérlek adj meg érvényes árat.");
+            return;
+          }
+
           if (category === "Autó") {
-            if (!brand) return;
-            if (!model && !modelOther) return;
-            if (y != null && (y < 1950 || y > new Date().getFullYear() + 1)) return;
-            if (k != null && k < 0) return;
+            if (!brand) {
+              setError("Válassz márkát.");
+              return;
+            }
+            if (!model && !modelOther) {
+              setError("Válassz típust, vagy add meg kézzel.");
+              return;
+            }
+            if (y != null && (y < 1950 || y > new Date().getFullYear() + 1)) {
+              setError("Évjárat nem tűnik valósnak.");
+              return;
+            }
+            if (k != null && k < 0) {
+              setError("Km óra állás nem lehet negatív.");
+              return;
+            }
+          }
+
+          // Optional Turnstile check (server-side verify)
+          if (turnstileSiteKey) {
+            const tokenEl = document.querySelector(
+              'textarea[name="cf-turnstile-response"]'
+            ) as HTMLTextAreaElement | null;
+            const token = tokenEl?.value;
+
+            if (!token) {
+              setError("Kérlek igazold, hogy nem vagy robot.");
+              return;
+            }
+
+            const r = await fetch("/api/turnstile/verify", {
+              method: "POST",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({ token }),
+            });
+
+            if (!r.ok) {
+              setError("Robot ellenőrzés sikertelen. Próbáld újra.");
+              return;
+            }
           }
 
           setSubmitted(true);
         }}
         className="mt-6 space-y-6"
       >
+        {/* Honeypot (hidden) */}
+        <div style={{ position: "absolute", left: -10000, top: "auto", width: 1, height: 1, overflow: "hidden" }} aria-hidden>
+          <label>
+            Website
+            <input
+              type="text"
+              tabIndex={-1}
+              autoComplete="off"
+              value={website}
+              onChange={(e) => setWebsite(e.target.value)}
+            />
+          </label>
+        </div>
+
         {/* Base */}
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="sm:col-span-2">
@@ -312,6 +386,12 @@ export default function PostPage() {
         <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-center text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900/30 dark:text-slate-300">
           Képfeltöltés (drag &amp; drop) — Supabase Storage után
         </div>
+
+        {turnstileSiteKey && (
+          <div className="rounded-2xl border border-slate-200/70 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+            <TurnstileWidget siteKey={turnstileSiteKey} />
+          </div>
+        )}
 
         <button
           type="submit"
