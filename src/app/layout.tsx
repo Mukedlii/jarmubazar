@@ -1,14 +1,34 @@
 import "./globals.css";
 
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { APP } from "@/lib/config";
 
-export const metadata = {
-  title: `${APP.name} – Jármű hirdetések` ,
-  description: `Jármű hirdetések – ${APP.region}.`,
+export const metadata: Metadata = {
+  metadataBase: new URL(APP.siteUrl),
+  title: {
+    default: `${APP.name} – Autóhirdetések`,
+    template: `%s • ${APP.name}`,
+  },
+  description: `Autó- és járműhirdetések – ${APP.region}.`,
+  icons: {
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+  },
+  openGraph: {
+    type: "website",
+    locale: "hu_HU",
+    url: "/",
+    title: `${APP.name} – Autóhirdetések`,
+    description: `Autó- és járműhirdetések – ${APP.region}.`,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${APP.name} – Autóhirdetések`,
+    description: `Autó- és járműhirdetések – ${APP.region}.`,
+  },
 };
 
 function NavLink({ href, children }: { href: string; children: ReactNode }) {
@@ -68,9 +88,18 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                   <span className="ml-2 text-slate-500 dark:text-slate-500">© {new Date().getFullYear()}</span>
                 </div>
               </div>
-              <div className="text-sm">
+              <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm">
                 <Link href="/contact" className="underline hover:text-blue-600">
                   Kapcsolat
+                </Link>
+                <Link href="/aszf" className="underline hover:text-blue-600">
+                  ÁSZF
+                </Link>
+                <Link href="/adatkezeles" className="underline hover:text-blue-600">
+                  Adatkezelés
+                </Link>
+                <Link href="/impresszum" className="underline hover:text-blue-600">
+                  Impresszum
                 </Link>
               </div>
             </div>
