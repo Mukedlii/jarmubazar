@@ -1,33 +1,56 @@
 import "./globals.css";
 
+import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { APP } from "@/lib/config";
 
 export const metadata = {
-  title: APP.name,
+  title: `${APP.name} – Jármű hirdetések` ,
   description: `Jármű hirdetések – ${APP.region}.`,
 };
+
+function NavLink({ href, children }: { href: string; children: ReactNode }) {
+  return (
+    <Link
+      href={href}
+      className="rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-200 dark:hover:bg-slate-900 dark:hover:text-white"
+    >
+      {children}
+    </Link>
+  );
+}
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="hu">
-      <body className="font-sans antialiased bg-gray-50 text-gray-900">
-        <header className="sticky top-0 z-50 bg-white shadow">
-          <nav className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-            <Link href="/" className="text-xl font-bold text-blue-600">
-              {APP.name}
+      <body className="min-h-dvh bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+        <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-950/70">
+          <nav className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
+            <Link href="/" className="flex items-center gap-3">
+              <Image src="/logo.svg" alt={`${APP.name} logo`} width={28} height={28} priority />
+              <div className="leading-tight">
+                <div className="text-sm font-extrabold tracking-tight text-slate-900 dark:text-white">
+                  {APP.name}
+                </div>
+                <div className="text-xs text-slate-500 dark:text-slate-400">{APP.region}</div>
+              </div>
             </Link>
-            <div className="flex space-x-4 text-sm">
-              <Link href="/browse" className="text-gray-700 hover:text-blue-600 transition-colors">
+
+            <div className="hidden items-center gap-1 sm:flex">
+              <NavLink href="/browse">Böngészés</NavLink>
+              <NavLink href="/post">Hirdetés feladás</NavLink>
+              <NavLink href="/login">Bejelentkezés</NavLink>
+              <NavLink href="/contact">Kapcsolat</NavLink>
+            </div>
+
+            <div className="flex items-center gap-2 sm:hidden">
+              <Link
+                href="/browse"
+                className="rounded-xl bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+              >
                 Böngészés
-              </Link>
-              <Link href="/post" className="text-gray-700 hover:text-blue-600 transition-colors">
-                Hirdetés feladás
-              </Link>
-              <Link href="/login" className="text-gray-700 hover:text-blue-600 transition-colors">
-                Bejelentkezés
               </Link>
             </div>
           </nav>
@@ -35,11 +58,22 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
         <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>
 
-        <footer className="bg-gray-100 text-gray-600 py-4 mt-8">
-          <div className="mx-auto max-w-5xl px-4 text-center text-sm">
-            <Link href="/contact" className="underline hover:text-blue-600">
-              Kapcsolat
-            </Link>
+        <footer className="mt-10 border-t border-slate-200/70 bg-white/60 py-6 text-slate-600 dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-400">
+          <div className="mx-auto max-w-5xl px-4">
+            <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
+              <div className="flex items-center gap-2">
+                <Image src="/logo.svg" alt="" width={18} height={18} />
+                <div className="text-sm">
+                  <span className="font-semibold text-slate-900 dark:text-slate-100">{APP.name}</span>
+                  <span className="ml-2 text-slate-500 dark:text-slate-500">© {new Date().getFullYear()}</span>
+                </div>
+              </div>
+              <div className="text-sm">
+                <Link href="/contact" className="underline hover:text-blue-600">
+                  Kapcsolat
+                </Link>
+              </div>
+            </div>
           </div>
         </footer>
       </body>

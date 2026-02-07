@@ -1,0 +1,21 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g" x1="20" y1="20" x2="108" y2="108" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2563EB"/>
+      <stop offset="1" stop-color="#0EA5E9"/>
+    </linearGradient>
+    <filter id="s" x="0" y="0" width="128" height="128" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- rounded badge -->
+  <rect x="12" y="12" width="104" height="104" rx="28" fill="#0B1220" filter="url(#s)"/>
+  <rect x="12" y="12" width="104" height="104" rx="28" stroke="url(#g)" stroke-width="2" opacity="0.9"/>
+
+  <!-- stylized road / JB mark -->
+  <path d="M38 84C38 63.9086 54.3568 47.5518 74.4482 47.5518H90" stroke="url(#g)" stroke-width="10" stroke-linecap="round"/>
+  <path d="M38 84H66" stroke="#E2E8F0" stroke-width="10" stroke-linecap="round" opacity="0.9"/>
+  <path d="M74 48V86" stroke="#E2E8F0" stroke-width="10" stroke-linecap="round" opacity="0.9"/>
+  <circle cx="90" cy="48" r="6" fill="#E2E8F0" opacity="0.9"/>
+</svg>
