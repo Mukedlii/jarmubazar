@@ -19,6 +19,7 @@ function toInt(v: string) {
 
 export default function BrowsePage() {
   const [category, setCategory] = useState<string>("Autó");
+  const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
 
   // General
   const [minPrice, setMinPrice] = useState<string>("");
@@ -71,6 +72,7 @@ export default function BrowsePage() {
       if (category === "Autó") {
         if (brand && item.brand !== brand) return false;
         if (model && item.model !== model) return false;
+
         if (minY != null && (item.year == null || item.year < minY)) return false;
         if (maxY != null && (item.year == null || item.year > maxY)) return false;
         if (minK != null && (item.km == null || item.km < minK)) return false;
@@ -111,201 +113,231 @@ export default function BrowsePage() {
 
   const showCarFilters = category === "Autó";
 
+  const clearFilters = () => {
+    setMinPrice("");
+    setMaxPrice("");
+    setLocation("");
+    setSort("newest");
+    setBrand("");
+    setModel("");
+    setMinYear("");
+    setMaxYear("");
+    setMinKm("");
+    setMaxKm("");
+    setFuel("");
+    setTransmission("");
+    setBodyType("");
+    setHungarianPlates("");
+  };
+
   return (
     <div className="space-y-6">
-      <div className="flex items-end justify-between gap-4">
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Böngészés</h1>
           <p className="mt-1 text-slate-600 dark:text-slate-400">
-            Szűrők (MVP bővítve hasznaltauto.hu stílusra) — még finomítjuk.
+            Találatok: <span className="font-semibold">{items.length}</span>
           </p>
         </div>
         <Link
           href="/post"
-          className="hidden rounded-xl bg-slate-900 px-4 py-2 font-semibold text-white hover:bg-slate-800 sm:inline-flex"
+          className="rounded-xl bg-slate-900 px-4 py-2 font-semibold text-white hover:bg-slate-800"
         >
           + Hirdetés feladás
         </Link>
       </div>
 
-      <div className="grid gap-3 rounded-2xl border bg-white p-4 dark:border-slate-800 dark:bg-slate-950 sm:grid-cols-2 lg:grid-cols-6">
-        <select
-          className={inputClass}
-          value={category}
-          onChange={(e) => {
-            setCategory(e.target.value);
-            // reset car filters when leaving cars
-            if (e.target.value !== "Autó") {
-              setBrand("");
-              setModel("");
-              setMinYear("");
-              setMaxYear("");
-              setMinKm("");
-              setMaxKm("");
-              setFuel("");
-              setTransmission("");
-              setBodyType("");
-              setHungarianPlates("");
-            }
-          }}
-        >
-          <option value="">Kategória</option>
-          <option value="Autó">Autó</option>
-          <option value="Motor">Motor</option>
-          <option value="Alkatrész">Alkatrész</option>
-        </select>
+      <div className="rounded-2xl border border-slate-200/70 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
+          <select
+            className={inputClass}
+            value={category}
+            onChange={(e) => {
+              setCategory(e.target.value);
+              if (e.target.value !== "Autó") {
+                setShowAdvanced(false);
+                setBrand("");
+                setModel("");
+                setMinYear("");
+                setMaxYear("");
+                setMinKm("");
+                setMaxKm("");
+                setFuel("");
+                setTransmission("");
+                setBodyType("");
+                setHungarianPlates("");
+              }
+            }}
+          >
+            <option value="">Kategória</option>
+            <option value="Autó">Autó</option>
+            <option value="Motor">Motor</option>
+            <option value="Alkatrész">Alkatrész</option>
+          </select>
 
-        <input
-          type="number"
-          inputMode="numeric"
-          placeholder="Min. ár"
-          className={inputClass}
-          value={minPrice}
-          onChange={(e) => setMinPrice(e.target.value)}
-        />
+          <input
+            type="number"
+            inputMode="numeric"
+            placeholder="Min. ár"
+            className={inputClass}
+            value={minPrice}
+            onChange={(e) => setMinPrice(e.target.value)}
+          />
 
-        <input
-          type="number"
-          inputMode="numeric"
-          placeholder="Max. ár"
-          className={inputClass}
-          value={maxPrice}
-          onChange={(e) => setMaxPrice(e.target.value)}
-        />
+          <input
+            type="number"
+            inputMode="numeric"
+            placeholder="Max. ár"
+            className={inputClass}
+            value={maxPrice}
+            onChange={(e) => setMaxPrice(e.target.value)}
+          />
 
-        <input
-          type="text"
-          placeholder="Település"
-          className={inputClass}
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-        />
+          <input
+            type="text"
+            placeholder="Település"
+            className={inputClass}
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+          />
 
-        <select className={inputClass} value={sort} onChange={(e) => setSort(e.target.value)}>
-          <option value="newest">Legújabb</option>
-          <option value="price">Ár szerint</option>
-        </select>
+          <select className={inputClass} value={sort} onChange={(e) => setSort(e.target.value)}>
+            <option value="newest">Legújabb</option>
+            <option value="price">Ár szerint</option>
+          </select>
 
-        <button
-          type="button"
-          onClick={() => {
-            setMinPrice("");
-            setMaxPrice("");
-            setLocation("");
-            setSort("newest");
-            setBrand("");
-            setModel("");
-            setMinYear("");
-            setMaxYear("");
-            setMinKm("");
-            setMaxKm("");
-            setFuel("");
-            setTransmission("");
-            setBodyType("");
-            setHungarianPlates("");
-          }}
-          className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100 dark:hover:bg-slate-900"
-        >
-          Szűrők törlése
-        </button>
+          <button
+            type="button"
+            onClick={clearFilters}
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100 dark:hover:bg-slate-900"
+          >
+            Szűrők törlése
+          </button>
 
-        {showCarFilters && (
-          <>
-            <select className={inputClass} value={brand} onChange={(e) => {
-              setBrand(e.target.value);
-              setModel("");
-            }}>
-              <option value="">Márka</option>
-              {CAR_BRANDS.map((b) => {
-                const c = brandCounts.get(b) ?? 0;
-                return (
-                  <option key={b} value={b}>
-                    {b} ({c})
+          {showCarFilters && (
+            <>
+              <select
+                className={inputClass}
+                value={brand}
+                onChange={(e) => {
+                  setBrand(e.target.value);
+                  setModel("");
+                }}
+              >
+                <option value="">Márka</option>
+                {CAR_BRANDS.map((b) => {
+                  const c = brandCounts.get(b) ?? 0;
+                  return (
+                    <option key={b} value={b}>
+                      {b} ({c})
+                    </option>
+                  );
+                })}
+              </select>
+
+              <select
+                className={inputClass}
+                value={model}
+                onChange={(e) => setModel(e.target.value)}
+                disabled={!brand}
+              >
+                <option value="">Típus</option>
+                {modelsForBrand.map((m) => (
+                  <option key={m} value={m}>
+                    {m}
                   </option>
-                );
-              })}
-            </select>
+                ))}
+              </select>
 
-            <select className={inputClass} value={model} onChange={(e) => setModel(e.target.value)} disabled={!brand}>
-              <option value="">Típus</option>
-              {modelsForBrand.map((m) => (
-                <option key={m} value={m}>
-                  {m}
-                </option>
-              ))}
-            </select>
+              <div className="sm:col-span-2 lg:col-span-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAdvanced((v) => !v)}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900"
+                >
+                  {showAdvanced ? "Részletes szűrők elrejtése" : "Részletes szűrők megnyitása"}
+                </button>
+              </div>
 
-            <input
-              type="number"
-              inputMode="numeric"
-              placeholder="Min. év"
-              className={inputClass}
-              value={minYear}
-              onChange={(e) => setMinYear(e.target.value)}
-            />
-            <input
-              type="number"
-              inputMode="numeric"
-              placeholder="Max. év"
-              className={inputClass}
-              value={maxYear}
-              onChange={(e) => setMaxYear(e.target.value)}
-            />
+              {showAdvanced && (
+                <>
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    placeholder="Min. év"
+                    className={inputClass}
+                    value={minYear}
+                    onChange={(e) => setMinYear(e.target.value)}
+                  />
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    placeholder="Max. év"
+                    className={inputClass}
+                    value={maxYear}
+                    onChange={(e) => setMaxYear(e.target.value)}
+                  />
 
-            <input
-              type="number"
-              inputMode="numeric"
-              placeholder="Min. km"
-              className={inputClass}
-              value={minKm}
-              onChange={(e) => setMinKm(e.target.value)}
-            />
-            <input
-              type="number"
-              inputMode="numeric"
-              placeholder="Max. km"
-              className={inputClass}
-              value={maxKm}
-              onChange={(e) => setMaxKm(e.target.value)}
-            />
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    placeholder="Min. km"
+                    className={inputClass}
+                    value={minKm}
+                    onChange={(e) => setMinKm(e.target.value)}
+                  />
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    placeholder="Max. km"
+                    className={inputClass}
+                    value={maxKm}
+                    onChange={(e) => setMaxKm(e.target.value)}
+                  />
 
-            <select className={inputClass} value={fuel} onChange={(e) => setFuel(e.target.value)}>
-              <option value="">Üzemanyag</option>
-              <option value="Benzin">Benzin</option>
-              <option value="Dízel">Dízel</option>
-              <option value="Hibrid">Hibrid</option>
-              <option value="Elektromos">Elektromos</option>
-              <option value="LPG">LPG</option>
-              <option value="CNG">CNG</option>
-            </select>
+                  <select className={inputClass} value={fuel} onChange={(e) => setFuel(e.target.value)}>
+                    <option value="">Üzemanyag</option>
+                    <option value="Benzin">Benzin</option>
+                    <option value="Dízel">Dízel</option>
+                    <option value="Hibrid">Hibrid</option>
+                    <option value="Elektromos">Elektromos</option>
+                    <option value="LPG">LPG</option>
+                    <option value="CNG">CNG</option>
+                  </select>
 
-            <select className={inputClass} value={transmission} onChange={(e) => setTransmission(e.target.value)}>
-              <option value="">Váltó</option>
-              <option value="Manuális">Manuális</option>
-              <option value="Automata">Automata</option>
-            </select>
+                  <select className={inputClass} value={transmission} onChange={(e) => setTransmission(e.target.value)}>
+                    <option value="">Váltó</option>
+                    <option value="Manuális">Manuális</option>
+                    <option value="Automata">Automata</option>
+                  </select>
 
-            <select className={inputClass} value={bodyType} onChange={(e) => setBodyType(e.target.value)}>
-              <option value="">Karosszéria</option>
-              <option value="Sedan">Sedan</option>
-              <option value="Kombi">Kombi</option>
-              <option value="Ferdehátú">Ferdehátú</option>
-              <option value="SUV">SUV</option>
-              <option value="Coupé">Coupé</option>
-              <option value="Egyterű">Egyterű</option>
-              <option value="Pickup">Pickup</option>
-              <option value="Kisbusz">Kisbusz</option>
-              <option value="Cabrio">Cabrio</option>
-            </select>
+                  <select className={inputClass} value={bodyType} onChange={(e) => setBodyType(e.target.value)}>
+                    <option value="">Karosszéria</option>
+                    <option value="Sedan">Sedan</option>
+                    <option value="Kombi">Kombi</option>
+                    <option value="Ferdehátú">Ferdehátú</option>
+                    <option value="SUV">SUV</option>
+                    <option value="Coupé">Coupé</option>
+                    <option value="Egyterű">Egyterű</option>
+                    <option value="Pickup">Pickup</option>
+                    <option value="Kisbusz">Kisbusz</option>
+                    <option value="Cabrio">Cabrio</option>
+                  </select>
 
-            <select className={inputClass} value={hungarianPlates} onChange={(e) => setHungarianPlates(e.target.value)}>
-              <option value="">Magyar forgalomban</option>
-              <option value="yes">Igen</option>
-              <option value="no">Nem (külföldi)
-              </option>
-            </select>
-          </>
-        )}
+                  <select
+                    className={inputClass}
+                    value={hungarianPlates}
+                    onChange={(e) => setHungarianPlates(e.target.value)}
+                  >
+                    <option value="">Magyar forgalomban</option>
+                    <option value="yes">Igen</option>
+                    <option value="no">Nem (külföldi)</option>
+                  </select>
+                </>
+              )}
+            </>
+          )}
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -313,7 +345,7 @@ export default function BrowsePage() {
           <Link
             key={item.id}
             href={`/listing/${item.id}`}
-            className="group overflow-hidden rounded-2xl border bg-white shadow-sm transition hover:shadow-md dark:border-slate-800 dark:bg-slate-950"
+            className="group overflow-hidden rounded-2xl border border-slate-200/70 bg-white shadow-sm transition hover:shadow-md dark:border-slate-800 dark:bg-slate-950"
           >
             <div className="relative aspect-[16/9] bg-slate-100 dark:bg-slate-900">
               <Image
