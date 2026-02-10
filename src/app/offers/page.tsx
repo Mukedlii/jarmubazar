@@ -66,6 +66,31 @@ export default function OffersPage() {
 
     run();
 
+    // Realtime: if a new offer arrives, refetch list.
+    if (isSupabaseConfigured) {
+      const ch = supabase
+        .channel("offers-inbox")
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "offers" },
+          async () => {
+            try {
+              const data = await getReceivedOffers();
+              if (!alive) return;
+              setRows(data as any);
+            } catch {
+              // ignore
+            }
+          }
+        )
+        .subscribe();
+
+      return () => {
+        alive = false;
+        supabase.removeChannel(ch);
+      };
+    }
+
     return () => {
       alive = false;
     };

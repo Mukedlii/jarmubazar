@@ -3,6 +3,7 @@
 
 -- Extensions
 create extension if not exists pgcrypto;
+create extension if not exists pg_net;
 
 -- 1) Listings
 create table if not exists public.listings (
@@ -198,3 +199,53 @@ create policy if not exists "offers_admin_update" on public.offers
 for update
 using (public.is_admin((auth.jwt() ->> 'email')))
 with check (public.is_admin((auth.jwt() ->> 'email')));
+
+-- NOTIFY on new offer (Phase 2 optional)
+-- This calls the Edge Function `offer-created` via pg_net.
+-- IMPORTANT: set your own secret (DB_WEBHOOK_SECRET) below and in the Edge Function env.
+create or replace function public.notify_offer_created()
+returns trigger
+language plpgsql
+security definer
+as $$
+declare
+  url text := current_setting('app.offer_created_url', true);
+  secret text := current_setting('app.offer_created_secret', true);
+  headers jsonb;
+  body jsonb;
+begin
+  -- If not configured, do nothing (safe default)
+  if url is null or url = '' then
+    return new;
+  end if;
+
+  headers := jsonb_build_object(
+    'content-type','application/json',
+    'authorization', case when secret is null then '' else 'Bearer ' || secret end
+  );
+
+  body := jsonb_build_object(
+    'offer_id', new.id,
+    'listing_id', new.listing_id,
+    'buyer_id', new.buyer_id,
+    'offer_price', new.offer_price,
+    'message', new.message
+  );
+
+  perform net.http_post(
+    url := url,
+    headers := headers,
+    body := body
+  );
+
+  return new;
+end;
+$$;
+
+do $$ begin
+  if not exists (select 1 from pg_trigger where tgname = 'tr_notify_offer_created') then
+    create trigger tr_notify_offer_created
+    after insert on public.offers
+    for each row execute function public.notify_offer_created();
+  end if;
+end $$;
