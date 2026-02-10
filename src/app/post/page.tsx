@@ -1,9 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+
+import { useRouter } from "next/navigation";
 
 import { TurnstileWidget } from "@/components/TurnstileWidget";
+import { createListing } from "@/lib/listingsRepo";
 import { CAR_BRANDS, listings } from "@/lib/mockData";
+import { isSupabaseConfigured, supabase } from "@/lib/supabaseClient";
 
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-900 placeholder:text-slate-400 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 disabled:opacity-60 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500";
@@ -14,8 +18,17 @@ function toInt(v: string) {
 }
 
 export default function PostPage() {
+  const router = useRouter();
+
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string>("");
+
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+    supabase.auth.getSession().then(({ data }) => {
+      if (!data.session) router.replace("/login");
+    });
+  }, [router]);
 
   // Honeypot: bots tend to fill every field. Real users never see this.
   const [website, setWebsite] = useState<string>("");
@@ -58,9 +71,7 @@ export default function PostPage() {
         <p className="mt-2 text-slate-600 dark:text-slate-400">
           A hirdetésed beküldve. Jóváhagyás után megjelenik a böngészésben.
         </p>
-        <p className="mt-3 text-xs text-slate-500 dark:text-slate-500">
-          Megjegyzés: ez most demo (mentés Supabase-be a következő lépés).
-        </p>
+        <p className="mt-3 text-xs text-slate-500 dark:text-slate-500">Mentve.</p>
       </div>
     );
   }
@@ -144,7 +155,29 @@ export default function PostPage() {
             }
           }
 
-          setSubmitted(true);
+          try {
+            const hp = hungarianPlates === "yes" ? true : hungarianPlates === "no" ? false : undefined;
+
+            await createListing({
+              category,
+              title,
+              description: description || undefined,
+              price: p,
+              location,
+              brand: category === "Autó" ? brand || undefined : undefined,
+              model: category === "Autó" ? (modelOther || model) || undefined : undefined,
+              year: category === "Autó" ? y : undefined,
+              km: category === "Autó" ? k : undefined,
+              fuel: category === "Autó" ? fuel || undefined : undefined,
+              transmission: category === "Autó" ? transmission || undefined : undefined,
+              bodyType: category === "Autó" ? bodyType || undefined : undefined,
+              hungarianPlates: category === "Autó" ? hp : undefined,
+            });
+
+            setSubmitted(true);
+          } catch (err: any) {
+            setError(err?.message ?? "Sikertelen mentés. Próbáld újra.");
+          }
         }}
         className="mt-6 space-y-6"
       >
