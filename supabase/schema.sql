@@ -87,10 +87,53 @@ create table if not exists public.offers (
 
 create index if not exists offers_listing_idx on public.offers (listing_id);
 
+-- 4) Alert subscriptions (Phase 3 - listing notifications)
+create table if not exists public.alert_subscriptions (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+
+  user_id uuid not null,
+  enabled boolean not null default true,
+
+  -- trial/paid gating: if null => disabled by backend; if set => allowed until this time
+  valid_until timestamptz,
+
+  -- Filters (MVP)
+  price_min integer,
+  price_max integer,
+  categories text[],
+  hungarian_plates_only boolean not null default false,
+
+  -- Channels (MVP)
+  email_enabled boolean not null default true,
+  telegram_enabled boolean not null default false,
+  telegram_chat_id text
+);
+
+create index if not exists alert_subscriptions_user_idx on public.alert_subscriptions (user_id);
+
+create table if not exists public.alert_deliveries (
+  id bigserial primary key,
+  created_at timestamptz not null default now(),
+  subscription_id uuid not null references public.alert_subscriptions(id) on delete cascade,
+  listing_id uuid not null references public.listings(id) on delete cascade,
+  unique (subscription_id, listing_id)
+);
+
+create table if not exists public.ip_trials (
+  ip_hash text primary key,
+  created_at timestamptz not null default now(),
+  trial_started_at timestamptz not null default now(),
+  trial_ends_at timestamptz not null
+);
+
 -- RLS
 alter table public.listings enable row level security;
 alter table public.offers enable row level security;
 alter table public.admin_allowlist enable row level security;
+alter table public.alert_subscriptions enable row level security;
+alter table public.alert_deliveries enable row level security;
+alter table public.ip_trials enable row level security;
 
 -- Helper: is_admin(email)
 create or replace function public.is_admin(email text)
@@ -111,6 +154,12 @@ create policy if not exists "admin_allowlist_admin_write" on public.admin_allowl
 for all
 using (public.is_admin((auth.jwt() ->> 'email')))
 with check (public.is_admin((auth.jwt() ->> 'email')));
+
+-- ALERT_DELIVERIES policies
+-- (kept private; only service role should write; admins can read if needed)
+create policy if not exists "alert_deliveries_admin_read" on public.alert_deliveries
+for select
+using (public.is_admin((auth.jwt() ->> 'email')));
 
 -- LISTINGS policies
 -- Public can read only approved listings
@@ -143,6 +192,25 @@ create policy if not exists "listings_admin_update" on public.listings
 for update
 using (public.is_admin((auth.jwt() ->> 'email')))
 with check (public.is_admin((auth.jwt() ->> 'email')));
+
+-- ALERT_SUBSCRIPTIONS policies
+-- User can manage own subscriptions
+create policy if not exists "alert_subscriptions_owner_select" on public.alert_subscriptions
+for select
+using (auth.uid() = user_id);
+
+create policy if not exists "alert_subscriptions_owner_insert" on public.alert_subscriptions
+for insert
+with check (auth.uid() = user_id);
+
+create policy if not exists "alert_subscriptions_owner_update" on public.alert_subscriptions
+for update
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
+
+create policy if not exists "alert_subscriptions_owner_delete" on public.alert_subscriptions
+for delete
+using (auth.uid() = user_id);
 
 -- OFFERS policies (private)
 -- Buyer can insert offer
@@ -247,5 +315,51 @@ do $$ begin
     create trigger tr_notify_offer_created
     after insert on public.offers
     for each row execute function public.notify_offer_created();
+  end if;
+end $$;
+
+-- NOTIFY on listing approved (Phase 3 - alerts)
+create or replace function public.notify_listing_approved()
+returns trigger
+language plpgsql
+security definer
+as $$
+declare
+  url text := current_setting('app.listing_approved_url', true);
+  secret text := current_setting('app.listing_approved_secret', true);
+  headers jsonb;
+  body jsonb;
+begin
+  -- only on transition to approved
+  if new.status <> 'approved' or (old.status is not distinct from new.status) then
+    return new;
+  end if;
+
+  if url is null or url = '' then
+    return new;
+  end if;
+
+  headers := jsonb_build_object(
+    'content-type','application/json',
+    'authorization', case when secret is null then '' else 'Bearer ' || secret end
+  );
+
+  body := jsonb_build_object('listing_id', new.id);
+
+  perform net.http_post(
+    url := url,
+    headers := headers,
+    body := body
+  );
+
+  return new;
+end;
+$$;
+
+do $$ begin
+  if not exists (select 1 from pg_trigger where tgname = 'tr_notify_listing_approved') then
+    create trigger tr_notify_listing_approved
+    after update of status on public.listings
+    for each row execute function public.notify_listing_approved();
   end if;
 end $$;

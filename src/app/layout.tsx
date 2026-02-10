@@ -62,6 +62,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <div className="hidden items-center gap-1 sm:flex">
               <NavLink href="/browse">Böngészés</NavLink>
               <NavLink href="/post">Hirdetés feladás</NavLink>
+              <NavLink href="/alerts">Értesítések</NavLink>
               <AuthLinks />
               <NavLink href="/contact">Kapcsolat</NavLink>
             </div>
