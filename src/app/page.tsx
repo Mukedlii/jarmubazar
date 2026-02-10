@@ -65,7 +65,7 @@ export default function Page() {
     {
       icon: "shield" as const,
       t: "Kevesebb spam",
-      d: "Jóváhagyásos rendszerrel tisztább a kínálat. (Admin panel hamarosan.)",
+      d: "Jóváhagyásos rendszerrel tisztább és áttekinthetőbb a kínálat.",
     },
     {
       icon: "pin" as const,
@@ -75,7 +75,7 @@ export default function Page() {
     {
       icon: "spark" as const,
       t: "Profi felület",
-      d: "Letisztult, átlátható UI. A cél: gyors eladás, gyors vásárlás.",
+      d: "Letisztult, átlátható felület — gyors böngészés és gyors kapcsolatfelvétel.",
     },
   ];
 
@@ -101,11 +101,11 @@ export default function Page() {
 
             <h1 className="mt-4 text-4xl font-extrabold tracking-tight sm:text-5xl">
               {APP.name}
-              <span className="block text-white/90">Autóhirdetések {APP.region} környékén.</span>
+              <span className="block text-white/90">Helyi járműhirdetések {APP.region} környékén.</span>
             </h1>
 
             <p className="mt-4 text-base text-white/80 sm:text-lg">
-              Válogatott találatok, átlátható szűrők, gyors böngészés. Ha eladnál, pár perc alatt feladhatod.
+              Helyi fókusz, letisztult szűrők, jóváhagyásos megjelenés — hogy a komoly hirdetések gyorsabban célba érjenek.
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
