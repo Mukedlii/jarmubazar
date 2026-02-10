@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import AuthLinks from "@/components/AuthLinks";
 import { APP } from "@/lib/config";
 
 export const metadata: Metadata = {
@@ -61,7 +62,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <div className="hidden items-center gap-1 sm:flex">
               <NavLink href="/browse">Böngészés</NavLink>
               <NavLink href="/post">Hirdetés feladás</NavLink>
-              <NavLink href="/login">Bejelentkezés</NavLink>
+              <AuthLinks />
               <NavLink href="/contact">Kapcsolat</NavLink>
             </div>
 

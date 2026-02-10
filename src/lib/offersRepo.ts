@@ -33,3 +33,24 @@ export async function createOffer(input: CreateOfferInput) {
 
   return { ok: true as const };
 }
+
+export async function getReceivedOffers() {
+  if (!isSupabaseConfigured) throw new Error("A funkció jelenleg nem elérhető.");
+
+  const { data: sessionData } = await supabase.auth.getSession();
+  const uid = sessionData.session?.user?.id;
+  if (!uid) throw new Error("Not authenticated");
+
+  // NOTE: RLS enforces who can see what:
+  // - seller: offers on their listings
+  // - admin: all offers
+  const { data, error } = await supabase
+    .from("offers")
+    .select(
+      "id, created_at, offer_price, message, status, counter_price, listing_id, listings:listing_id ( id, title, price )"
+    )
+    .order("created_at", { ascending: false });
+
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}

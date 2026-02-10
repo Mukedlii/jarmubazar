@@ -25,12 +25,23 @@ Vercel → Project → Settings → Environment Variables:
 
 Local (ha kell): `.env.local` ugyan ezekkel.
 
-## 4) Admin email (később)
+## 4) SQL schema (KÖTELEZŐ)
+Supabase Dashboard → **SQL Editor** → futtasd le ezt a fájlt:
+- `supabase/schema.sql`
+
+Ez hozza létre többek között:
+- `listings` tábla
+- `offers` tábla (ajánlatok)
+- RLS policy-k (ki mit láthat / módosíthat)
+
+## 5) Admin email (később)
 Admin whitelistet majd szerver oldalon (RLS + service role) fogunk megoldani.
 Első admin: `marky.genoff@gmail.com`
 
-## 5) Teszt
+## 6) Teszt
 - `/login` → add meg az emailt → magic link
 - link a `/auth/callback`-re fog visszajönni
+- Nyiss meg egy hirdetést → **Ajánlat tétel** (csak login után)
+- Eladó/admin: **/offers** oldalon látja a beérkezett ajánlatokat
 
 Megjegyzés: saját domain NEM kell a működéshez, csak az "éles" feladóhoz/deliverability-hez ajánlott.
